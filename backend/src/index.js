@@ -10,6 +10,7 @@ import cron from "node-cron";
 
 import { initializeSocket } from "./lib/socket.js";
 import { seedData } from "./lib/seedData.js";
+import debugApp from "./debug.js";
 
 import { connectDB } from "./lib/db.js";
 import userRoutes from "./routes/user.route.js";
@@ -70,6 +71,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/songs", songRoutes);
 app.use("/api/albums", albumRoutes);
 app.use("/api/stats", statRoutes);
+
+// Debug route (only in development)
+if (process.env.NODE_ENV === "development") {
+	app.use("/api", debugApp);
+}
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "../frontend/dist")));
