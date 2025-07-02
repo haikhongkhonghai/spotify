@@ -9,6 +9,7 @@ import { createServer } from "http";
 import cron from "node-cron";
 
 import { initializeSocket } from "./lib/socket.js";
+import { seedData } from "./lib/seedData.js";
 
 import { connectDB } from "./lib/db.js";
 import userRoutes from "./routes/user.route.js";
@@ -82,7 +83,16 @@ app.use((err, req, res, next) => {
 	res.status(500).json({ message: process.env.NODE_ENV === "production" ? "Internal server error" : err.message });
 });
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, async () => {
 	console.log("Server is running on port " + PORT);
-	connectDB();
+	await connectDB();
+	
+	// Auto-seed data only if SEED_DATA environment variable is set
+	if (process.env.SEED_DATA === "true") {
+		try {
+			await seedData();
+		} catch (error) {
+			console.error("Failed to seed database:", error);
+		}
+	}
 });
